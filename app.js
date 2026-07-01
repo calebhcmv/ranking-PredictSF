@@ -6,6 +6,9 @@
 const MEDALS = ['🥇', '🥈', '🥉'];
 const RANKING_CONTAINER_ID = 'rankingContainer';
 
+const rankingContainer = document.getElementById('ranking-container');
+const rankingStatus = document.getElementById('ranking-status');
+
 /**
  * Loads ranking data from ranking.json.
  * @returns {Promise<{players: Array, error: Error|null}>}
@@ -29,6 +32,14 @@ async function loadRanking() {
     console.error('Erro ao carregar ranking:', error);
     return { players: [], error };
   }
+
+  const players = await response.json();
+
+  if (!Array.isArray(players)) {
+    throw new Error('O arquivo ranking.json precisa conter um array de jogadores.');
+  }
+
+  return players;
 }
 
 /**
@@ -123,6 +134,9 @@ function renderRanking(players) {
   players.forEach((player, index) => {
     container.appendChild(createPlayerCard(player, index + 1));
   });
+
+  rankingStatus.hidden = true;
+  rankingContainer.hidden = false;
 }
 
 /**
