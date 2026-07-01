@@ -4,12 +4,12 @@ Uma página estática, moderna e responsiva para exibir o ranking do PredictSF. 
 
 ## 📋 Visão Geral
 
-Este é um MVP totalmente estático, sem dependências de backend, banco de dados ou frameworks. A página carrega dados automaticamente de um arquivo `ranking.json` e os exibe de forma elegante e responsiva.
+Este é um MVP totalmente estático, sem dependências de backend, banco de dados ou frameworks. A página usa uma lista JSON embutida no `index.html` como fonte única para exibir o ranking de forma elegante e responsiva.
 
 **Stack utilizado:**
 - HTML5 (semântico)
 - CSS3 (moderno e responsivo)
-- JavaScript ES6 (modular e bem comentado)
+- JavaScript ES6 embutido no `index.html`
 - Tailwind CSS (via CDN)
 - Google Fonts (Poppins e Inter)
 
@@ -18,9 +18,7 @@ Este é um MVP totalmente estático, sem dependências de backend, banco de dado
 ```
 /ranking
 │
-├── index.html          # Página principal
-├── app.js              # Lógica da aplicação
-├── ranking.json        # Dados do ranking
+├── index.html          # Página principal, dados e lógica do ranking
 └── README.md           # Este arquivo
 ```
 
@@ -48,9 +46,9 @@ Este é um MVP totalmente estático, sem dependências de backend, banco de dado
 
 ## 🚀 Como Usar
 
-### Estrutura do ranking.json
+### Estrutura dos dados do ranking
 
-O arquivo `ranking.json` deve conter um array de objetos com os seguintes campos:
+A lista JSON embutida no `index.html`, dentro de `<script type="application/json" id="rankingData">`, deve conter um array de objetos com os seguintes campos:
 
 ```json
 [
@@ -73,10 +71,11 @@ O arquivo `ranking.json` deve conter um array de objetos com os seguintes campos
 
 ### Atualizar o Ranking
 
-1. Abra o arquivo `ranking.json`
-2. Atualize os dados dos jogadores (adicione, remova ou modifique)
-3. Salve o arquivo
-4. Recarregue a página no navegador
+1. Abra o arquivo `index.html`
+2. Procure por `<script type="application/json" id="rankingData">`
+3. Atualize os dados dos jogadores (adicione, remova ou modifique)
+4. Salve o arquivo
+5. Recarregue a página no navegador
 
 Os dados serão carregados automaticamente e a lista será renderizada com as novas posições.
 
@@ -142,7 +141,7 @@ Acesse `http://localhost:8000` no navegador.
 
 ### Atualizações Automáticas
 
-Cada vez que você fazer push para o branch `main`, o Cloudflare Pages automaticamente:
+Cada vez que você fizer push para o branch `main`, o Cloudflare Pages automaticamente:
 - Detecta as mudanças
 - Faz redeploy do site
 - Seu ranking será atualizado em minutos
@@ -151,13 +150,12 @@ Cada vez que você fazer push para o branch `main`, o Cloudflare Pages automatic
 
 ### Modularidade do JavaScript
 
-O código em `app.js` é organizado em funções limpas e bem documentadas:
+O JavaScript embutido em `index.html` é organizado em funções limpas e bem documentadas:
 
-- `loadRanking()` - Carrega dados do ranking.json
+- `init()` - Lê os dados JSON embutidos na página e inicializa o ranking
 - `sortPlayers()` - Ordena jogadores por pontuação
 - `createPlayerCard()` - Cria elemento HTML do card
 - `renderRanking()` - Renderiza a lista completa
-- `init()` - Inicializa a página
 
 ### Boas Práticas
 
@@ -181,7 +179,7 @@ O código em `app.js` é organizado em funções limpas e bem documentadas:
 
 - ✨ Animações suaves e elegantes
 - 🏅 Medalhas para top 3 posições
-- 📊 Avares circulares com gradiente
+- 📊 Avatares circulares com gradiente
 - 💫 Hover effects premium
 - 📱 Design responsivo perfeito
 - ♿ Semântica acessível
@@ -190,7 +188,7 @@ O código em `app.js` é organizado em funções limpas e bem documentadas:
 
 ### Adicionar um novo jogador
 
-1. Abra `ranking.json`
+1. Abra `index.html` e procure por `rankingData`
 2. Adicione um novo objeto ao array:
 
 ```json
@@ -206,7 +204,7 @@ O código em `app.js` é organizado em funções limpas e bem documentadas:
 
 ### Atualizar pontos
 
-Simples modifique o valor de `points` no JSON:
+Simplesmente modifique o valor de `points` no JSON embutido em `index.html`:
 
 ```json
 {
@@ -221,11 +219,10 @@ A página automaticamente recalculará o ranking.
 
 ## ⚠️ Notas Importantes
 
-1. **Não confie na ordem do JSON:** A página sempre ordena por pontuação
-2. **ID é apenas identificador:** Não é usado para ordenação
-3. **Avatar deve ser 1 caractere:** Recomendado usar a inicial do nome
-4. **Servidor HTTP obrigatório:** `index.html` não funciona com `file://`
-5. **Sem cache agressivo:** Dados são recarregados a cada reload
+1. **Atualize apenas o JSON embutido no `index.html`:** ele é a fonte única do ranking
+2. **Não confie na ordem do JSON:** a página sempre ordena por pontuação
+3. **ID é apenas identificador:** não é usado para ordenação
+4. **Avatar deve ser 1 caractere:** recomendado usar a inicial do nome
 
 ## 🤝 Contribuições
 
