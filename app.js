@@ -3,7 +3,45 @@
  * Static ranking page with automatic data loading and sorting.
  */
 
-const RANKING_URL = './ranking.json';
+const RANKING_URLS = ['./ranking.json', '/ranking.json'];
+const FALLBACK_RANKING = [
+  {
+    "id": 1,
+    "name": "Caleb",
+    "avatar": "C",
+    "points": 187
+  },
+  {
+    "id": 2,
+    "name": "Lucas",
+    "avatar": "L",
+    "points": 181
+  },
+  {
+    "id": 3,
+    "name": "Pedro",
+    "avatar": "P",
+    "points": 178
+  },
+  {
+    "id": 4,
+    "name": "João",
+    "avatar": "J",
+    "points": 154
+  },
+  {
+    "id": 5,
+    "name": "Maria",
+    "avatar": "M",
+    "points": 142
+  },
+  {
+    "id": 6,
+    "name": "Ana",
+    "avatar": "A",
+    "points": 135
+  }
+];
 
 // Medals for top 3 positions
 const MEDALS = {
@@ -15,23 +53,35 @@ const MEDALS = {
 const POINTS_FORMATTER = new Intl.NumberFormat('pt-BR');
 
 /**
- * Loads ranking data from ranking.json.
- * @returns {Promise<{players: Array, error: Error|null}>}
+ * Loads ranking data from ranking.json
+ * @returns {Promise<Object>} Ranking payload with players and source
  */
 async function loadRanking() {
-  const response = await fetch(RANKING_URL, { cache: 'no-store' });
+  const errors = [];
 
-  if (!response.ok) {
-    throw new Error(`Falha ao carregar o ranking (${response.status})`);
+  for (const url of RANKING_URLS) {
+    try {
+      const response = await fetch(url, { cache: 'no-store' });
+
+      if (!response.ok) {
+        throw new Error(`Falha ao carregar ${url} (${response.status})`);
+      }
+
+      const players = await response.json();
+
+      if (!Array.isArray(players)) {
+        throw new Error(`${url} precisa conter uma lista de jogadores.`);
+      }
+
+      return { players, source: 'ranking.json' };
+    } catch (error) {
+      errors.push(error);
+      console.warn('Ranking source unavailable:', error);
+    }
   }
 
-  const players = await response.json();
-
-  if (!Array.isArray(players)) {
-    throw new Error('O arquivo ranking.json precisa conter uma lista de jogadores.');
-  }
-
-  return players;
+  console.warn('Using bundled fallback ranking data:', errors);
+  return { players: FALLBACK_RANKING, source: 'dados embutidos' };
 }
 
 /**
@@ -59,6 +109,15 @@ function sortPlayers(players) {
   return players
     .filter(isValidPlayer)
     .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, 'pt-BR'));
+}
+
+/**
+ * Formats a point value for display.
+ * @param {number} points - Player points
+ * @returns {string} Formatted points
+ */
+function formatPoints(points) {
+  return POINTS_FORMATTER.format(points);
 }
 
 /**
@@ -159,6 +218,21 @@ function renderStatus(message, type = 'info') {
 }
 
 /**
+ * Renders a status message in the ranking container.
+ * @param {string} message - Message to show
+ * @param {string} type - Status type used for styling
+ */
+function renderStatus(message, type = 'info') {
+  const container = document.getElementById('rankingContainer');
+  container.innerHTML = '';
+
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
+}
+
+/**
  * Renders the complete ranking list
  * @param {Array} players - Array of sorted player objects
  */
@@ -170,6 +244,8 @@ function renderRanking(players) {
     renderStatus('Nenhum dado disponível no momento.');
     return;
   }
+
+  const fragment = document.createDocumentFragment();
 
   const fragment = document.createDocumentFragment();
 
@@ -185,28 +261,27 @@ function renderRanking(players) {
 /**
  * Updates the timestamp displayed in the footer.
  */
-function renderUpdatedAt() {
+function renderUpdatedAt(source = 'ranking.json') {
   const updatedAt = document.getElementById('updatedAt');
 
   if (!updatedAt) {
     return;
   }
 
-  updatedAt.textContent = `Revisado em ${new Intl.DateTimeFormat('pt-BR', {
+  updatedAt.textContent = `Dados de ${source} · revisado em ${new Intl.DateTimeFormat('pt-BR', {
     dateStyle: 'short',
     timeStyle: 'short'
   }).format(new Date())}`;
 }
 
 /**
- * Initializes the ranking page.
- * Loads data, sorts by points, and renders the list.
+ * Updates the timestamp displayed in the footer.
  */
 async function init() {
   renderStatus('Carregando ranking...');
 
   try {
-    const players = await loadRanking();
+    const { players, source } = await loadRanking();
     const sortedPlayers = sortPlayers(players);
 
     if (sortedPlayers.length === 0) {
@@ -215,10 +290,10 @@ async function init() {
     }
 
     renderRanking(sortedPlayers);
-    renderUpdatedAt();
+    renderUpdatedAt(source);
   } catch (error) {
     console.error('Error loading ranking:', error);
-    renderStatus('Não foi possível carregar o ranking. Tente novamente em instantes.', 'error');
+    renderStatus('Não foi possível carregar o ranking. Confira o arquivo ranking.json.', 'error');
   }
 }
 
