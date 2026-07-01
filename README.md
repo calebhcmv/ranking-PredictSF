@@ -142,7 +142,7 @@ Acesse `http://localhost:8000` no navegador.
 
 ### Atualizações Automáticas
 
-Cada vez que você fazer push para o branch `main`, o Cloudflare Pages automaticamente:
+Cada vez que você fizer push para o branch `main`, o Cloudflare Pages automaticamente:
 - Detecta as mudanças
 - Faz redeploy do site
 - Seu ranking será atualizado em minutos
@@ -181,7 +181,7 @@ O código em `app.js` é organizado em funções limpas e bem documentadas:
 
 - ✨ Animações suaves e elegantes
 - 🏅 Medalhas para top 3 posições
-- 📊 Avares circulares com gradiente
+- 📊 Avatares circulares com gradiente
 - 💫 Hover effects premium
 - 📱 Design responsivo perfeito
 - ♿ Semântica acessível
@@ -206,7 +206,7 @@ O código em `app.js` é organizado em funções limpas e bem documentadas:
 
 ### Atualizar pontos
 
-Simples modifique o valor de `points` no JSON:
+Simplesmente modifique o valor de `points` no JSON:
 
 ```json
 {
