@@ -1,244 +1,127 @@
 # 🏆 PredictSF Ranking MVP
 
-Uma página estática, moderna e responsiva para exibir o ranking do PredictSF. Desenvolvida com HTML5, CSS3, JavaScript ES6 e Tailwind CSS via CDN.
+Página estática, moderna e responsiva para exibir o ranking geral do PredictSF. O MVP não usa backend, banco de dados, framework ou etapa de build: os dados são carregados diretamente do arquivo `ranking.json`.
 
-## 📋 Visão Geral
+## Stack
 
-Este é um MVP totalmente estático, sem dependências de backend, banco de dados ou frameworks. A página carrega dados automaticamente de um arquivo `ranking.json` e os exibe de forma elegante e responsiva.
+- HTML5 semântico
+- CSS3 organizado
+- JavaScript ES6
+- Tailwind CSS via CDN
+- Google Fonts: Poppins para títulos e Inter para conteúdo
 
-**Stack utilizado:**
-- HTML5 (semântico)
-- CSS3 (moderno e responsivo)
-- JavaScript ES6 (modular e bem comentado)
-- Tailwind CSS (via CDN)
-- Google Fonts (Poppins e Inter)
+## Estrutura
 
-## 📁 Estrutura do Projeto
-
-```
+```text
 /ranking
 │
-├── index.html          # Página principal
-├── app.js              # Lógica da aplicação
-├── ranking.json        # Dados do ranking
-└── README.md           # Este arquivo
+├── index.html      # Página principal e estilos do MVP
+├── app.js          # Carregamento, ordenação e renderização do ranking
+├── ranking.json    # Dados estáticos dos jogadores
+└── README.md       # Documentação do projeto
 ```
 
-## 🎨 Design
+## Como funciona
 
-**Paleta de cores:**
-- Background: `#07162A` (azul escuro)
-- Card: `#102340` (azul mais claro)
-- Borda: `#1E4B82` (azul médio)
-- Azul principal: `#2F80FF` (azul vibrante)
-- Texto: `#FFFFFF` (branco)
-- Texto secundário: `#A9B6C9` (cinza azulado)
-- Medalhas: `#F5C542` (ouro), `#C8CED8` (prata), `#CD7F32` (bronze)
+Ao abrir a página em um servidor estático, o JavaScript executa o seguinte fluxo:
 
-**Tipografia:**
-- Títulos: Poppins (600, 700)
-- Conteúdo: Inter (400, 500, 600)
+1. Busca o arquivo `ranking.json`.
+2. Valida se o conteúdo é um array.
+3. Ordena os jogadores por `points` em ordem decrescente.
+4. Calcula as posições dinamicamente a partir da lista ordenada.
+5. Renderiza todos os cards com medalhas para o Top 3.
 
-**Características:**
-- Card centralizado com largura máxima de 700px
-- Totalmente responsivo (desktop e mobile)
-- Hover suave com transição de 200ms
-- Animação de fade na entrada
-- Rolagem suave (scroll behavior)
+> A posição nunca é lida do JSON. Ela sempre é calculada no navegador com base na pontuação atual.
 
-## 🚀 Como Usar
+## Formato do JSON
 
-### Estrutura do ranking.json
-
-O arquivo `ranking.json` deve conter um array de objetos com os seguintes campos:
+O arquivo `ranking.json` deve conter um array de jogadores neste formato:
 
 ```json
 [
   {
     "id": 1,
-    "name": "Nome do Jogador",
-    "avatar": "A",
+    "name": "Caleb",
+    "avatar": "C",
     "points": 187
+  },
+  {
+    "id": 2,
+    "name": "Lucas",
+    "avatar": "L",
+    "points": 181
+  },
+  {
+    "id": 3,
+    "name": "Pedro",
+    "avatar": "P",
+    "points": 178
   }
 ]
 ```
 
-**Campos obrigatórios:**
-- `id` (number): Identificador único
-- `name` (string): Nome do jogador
-- `avatar` (string): Inicial do nome (1 caractere)
-- `points` (number): Pontuação
+### Campos
 
-**Observação importante:** O arquivo não precisa estar ordenado. A página automaticamente ordena os jogadores por pontuação (decrescente) e calcula as posições.
+- `id`: identificador único do jogador.
+- `name`: nome exibido no card.
+- `avatar`: inicial exibida no avatar circular.
+- `points`: pontuação usada para ordenar o ranking.
 
-### Atualizar o Ranking
+## Como atualizar o ranking
 
-1. Abra o arquivo `ranking.json`
-2. Atualize os dados dos jogadores (adicione, remova ou modifique)
-3. Salve o arquivo
-4. Recarregue a página no navegador
+1. Abra o arquivo `ranking.json`.
+2. Adicione, remova ou edite jogadores.
+3. Atualize o valor de `points` sempre que a pontuação mudar.
+4. Salve o arquivo e publique novamente, se estiver em produção.
 
-Os dados serão carregados automaticamente e a lista será renderizada com as novas posições.
+A lista pode ficar em qualquer ordem dentro do JSON, pois a interface sempre ordena por pontuação automaticamente.
 
-### Executar Localmente
+## Rodando localmente
 
-Para testar localmente, você precisa servir os arquivos com um servidor HTTP (não pode abrir `index.html` diretamente do arquivo):
+Por usar `fetch()` para carregar `ranking.json`, rode os arquivos com um servidor estático local:
 
-**Opção 1: Python 3**
 ```bash
-python -m http.server 8000
+python3 -m http.server 8000
 ```
 
-**Opção 2: Node.js (http-server)**
-```bash
-npx http-server
+Depois acesse:
+
+```text
+http://localhost:8000
 ```
 
-**Opção 3: Live Server (VS Code)**
-- Instale a extensão "Live Server"
-- Clique com botão direito em `index.html`
-- Selecione "Open with Live Server"
+Também é possível usar qualquer servidor estático moderno, como Live Server no VS Code ou o preview do Cloudflare Pages.
 
-Acesse `http://localhost:8000` no navegador.
+## Publicação no Cloudflare Pages
 
-## 📱 Responsividade
+1. Envie os arquivos para um repositório Git.
+2. No painel da Cloudflare, acesse **Workers & Pages**.
+3. Crie um novo projeto do Pages e conecte o repositório.
+4. Configure:
+   - **Build command:** deixe vazio.
+   - **Build output directory:** `/`.
+5. Faça o deploy.
 
-- **Desktop:** Lista centralizada com largura máxima de 700px
-- **Mobile:** Cards ocupam praticamente toda a largura (com padding lateral)
-- **Sem barra horizontal:** Totalmente responsivo em qualquer resolução
+Como não existe build, o Cloudflare Pages publicará diretamente os arquivos estáticos da raiz do projeto.
 
-## 🌐 Deploy no Cloudflare Pages
+## Design e UX
 
-### Requisitos
-- Conta no Cloudflare
-- Repositório Git (GitHub, GitLab, ou Gitea)
+- Fundo azul escuro `#07162A`.
+- Card central premium com largura máxima de `700px`.
+- Visual inspirado em Apple + Sofascore.
+- Cards responsivos sem barra horizontal.
+- Hover suave com transição de `200ms`.
+- Animação de fade na entrada da lista.
+- Medalhas para 1º, 2º e 3º lugares.
+- Pontuação alinhada à direita.
 
-### Passos
+## Manutenção
 
-1. **Faça push do código para um repositório Git:**
-   ```bash
-   git add .
-   git commit -m "Initial commit: PredictSF Ranking MVP"
-   git push origin main
-   ```
+A lógica principal fica em funções pequenas no `app.js`:
 
-2. **Acesse o Cloudflare Dashboard:**
-   - Vá para https://dash.cloudflare.com
-   - Navegue até "Pages"
-   - Clique em "Create a project"
+- `loadRanking()`
+- `sortPlayers()`
+- `renderRanking()`
+- `createPlayerCard()`
 
-3. **Conecte seu repositório:**
-   - Selecione seu provedor de Git
-   - Autorize o Cloudflare a acessar seus repositórios
-   - Selecione o repositório `ranking-PredictSF`
-
-4. **Configure o build:**
-   - Build command: deixe vazio (não há build necessário)
-   - Build output directory: `/` (raiz do projeto)
-
-5. **Deploy:**
-   - Clique em "Save and Deploy"
-   - O site será publicado automaticamente em `https://<seu-projeto>.pages.dev`
-
-### Atualizações Automáticas
-
-Cada vez que você fazer push para o branch `main`, o Cloudflare Pages automaticamente:
-- Detecta as mudanças
-- Faz redeploy do site
-- Seu ranking será atualizado em minutos
-
-## 🔧 Desenvolvimento
-
-### Modularidade do JavaScript
-
-O código em `app.js` é organizado em funções limpas e bem documentadas:
-
-- `loadRanking()` - Carrega dados do ranking.json
-- `sortPlayers()` - Ordena jogadores por pontuação
-- `createPlayerCard()` - Cria elemento HTML do card
-- `renderRanking()` - Renderiza a lista completa
-- `init()` - Inicializa a página
-
-### Boas Práticas
-
-- ✅ HTML semântico
-- ✅ Sem duplicação de código
-- ✅ Comentários descritivos
-- ✅ Variáveis e funções com nomes claros
-- ✅ Tratamento de erros
-- ✅ Responsivo com CSS moderno
-- ✅ Performance otimizada
-- ✅ Compatibilidade com navegadores modernos
-
-## 🎯 Performance
-
-- **Sem dependências externas** (exceto Tailwind e Google Fonts via CDN)
-- **Tamanho reduzido** (< 50KB total)
-- **Carregamento rápido** (sem assets pesados)
-- **Zero latência de API** (dados estáticos)
-
-## 🌟 Recursos
-
-- ✨ Animações suaves e elegantes
-- 🏅 Medalhas para top 3 posições
-- 📊 Avares circulares com gradiente
-- 💫 Hover effects premium
-- 📱 Design responsivo perfeito
-- ♿ Semântica acessível
-
-## 📝 Exemplo de Uso
-
-### Adicionar um novo jogador
-
-1. Abra `ranking.json`
-2. Adicione um novo objeto ao array:
-
-```json
-{
-  "id": 7,
-  "name": "Carlos",
-  "avatar": "C",
-  "points": 128
-}
-```
-
-3. Salve e recarregue a página
-
-### Atualizar pontos
-
-Simples modifique o valor de `points` no JSON:
-
-```json
-{
-  "id": 1,
-  "name": "Caleb",
-  "avatar": "C",
-  "points": 195  // Pontuação atualizada
-}
-```
-
-A página automaticamente recalculará o ranking.
-
-## ⚠️ Notas Importantes
-
-1. **Não confie na ordem do JSON:** A página sempre ordena por pontuação
-2. **ID é apenas identificador:** Não é usado para ordenação
-3. **Avatar deve ser 1 caractere:** Recomendado usar a inicial do nome
-4. **Servidor HTTP obrigatório:** `index.html` não funciona com `file://`
-5. **Sem cache agressivo:** Dados são recarregados a cada reload
-
-## 🤝 Contribuições
-
-Este é um MVP pronto para produção. Melhorias futuras podem incluir:
-- Animação ao trocar posições
-- Filtros ou busca
-- Histórico de pontuações
-- Temas (dark/light)
-
-## 📄 Licença
-
-Este projeto é de código aberto e livre para uso.
-
----
-
-**Desenvolvido com ❤️ para PredictSF**
+Isso facilita alterações futuras sem adicionar dependências ou complexidade desnecessária.
