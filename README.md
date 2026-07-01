@@ -53,6 +53,18 @@ O arquivo deve conter um array JSON. Cada item representa um jogador:
     "name": "Nome do Jogador",
     "avatar": "N",
     "points": 187
+  },
+  {
+    "id": 2,
+    "name": "Lucas",
+    "avatar": "L",
+    "points": 181
+  },
+  {
+    "id": 3,
+    "name": "Pedro",
+    "avatar": "P",
+    "points": 178
   }
 ]
 ```

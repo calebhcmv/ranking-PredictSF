@@ -1,139 +1,159 @@
 /**
  * PredictSF Ranking MVP
- * Static ranking page with automatic data loading and sorting
+ * Static ranking page with automatic data loading and sorting.
  */
 
-// Medals for top 3 positions
-const MEDALS = {
-  1: '🥇',
-  2: '🥈',
-  3: '🥉'
-};
+const MEDALS = ['🥇', '🥈', '🥉'];
+const RANKING_CONTAINER_ID = 'rankingContainer';
+
+const rankingContainer = document.getElementById('ranking-container');
+const rankingStatus = document.getElementById('ranking-status');
 
 /**
- * Loads ranking data from ranking.json
- * @returns {Promise<Array>} Array of player objects
+ * Loads ranking data from ranking.json.
+ * @returns {Promise<{players: Array, error: Error|null}>}
  */
 async function loadRanking() {
   try {
     const response = await fetch('./ranking.json');
+
     if (!response.ok) {
-      throw new Error(`Failed to load ranking: ${response.statusText}`);
+      throw new Error(`Falha ao carregar ranking.json (${response.status})`);
     }
-    return await response.json();
+
+    const data = await response.json();
+
+    if (!Array.isArray(data)) {
+      throw new Error('ranking.json deve conter uma lista de participantes');
+    }
+
+    return { players: data, error: null };
   } catch (error) {
-    console.error('Error loading ranking:', error);
-    return [];
+    console.error('Erro ao carregar ranking:', error);
+    return { players: [], error };
   }
+
+  const players = await response.json();
+
+  if (!Array.isArray(players)) {
+    throw new Error('O arquivo ranking.json precisa conter um array de jogadores.');
+  }
+
+  return players;
 }
 
 /**
- * Sorts players by points in descending order
- * @param {Array} players - Array of player objects
- * @returns {Array} Sorted array of players
+ * Sorts players by points in descending order.
+ * @param {Array} players - Array of player objects.
+ * @returns {Array} Sorted array of players.
  */
 function sortPlayers(players) {
-  return [...players].sort((a, b) => b.points - a.points);
+  return [...players].sort((a, b) => Number(b.points) - Number(a.points));
 }
 
 /**
- * Creates a player card HTML element
- * @param {Object} player - Player object with id, name, avatar, points
- * @param {number} position - Player's position in ranking (1-indexed)
- * @returns {HTMLElement} Card element
+ * Creates a player card HTML element.
+ * @param {Object} player - Player object with id, name, avatar, points.
+ * @param {number} position - Player's generated ranking position (1-indexed).
+ * @returns {HTMLElement} List item element.
  */
 function createPlayerCard(player, position) {
-  const card = document.createElement('div');
-  card.className = 'player-card';
+  const item = document.createElement('li');
+  item.className = 'player-card';
+  item.setAttribute('aria-label', `${position}º lugar: ${player.name}, ${player.points} pontos`);
 
-  // Position or Medal
-  const positionElement = document.createElement('div');
-  if (MEDALS[position]) {
-    positionElement.className = 'medal';
-    positionElement.textContent = MEDALS[position];
-  } else {
-    positionElement.className = 'position';
-    positionElement.textContent = position;
-  }
+  const positionElement = document.createElement('span');
+  const medal = MEDALS[position - 1];
+  positionElement.className = medal ? 'medal' : 'position';
+  positionElement.textContent = medal || position;
+  positionElement.setAttribute('aria-label', medal ? `${position}º lugar` : `${position}`);
 
-  // Avatar
-  const avatar = document.createElement('div');
+  const avatar = document.createElement('span');
   avatar.className = 'avatar';
   avatar.textContent = player.avatar;
+  avatar.setAttribute('aria-hidden', 'true');
 
-  // Player Info
   const info = document.createElement('div');
   info.className = 'player-info';
 
-  const name = document.createElement('div');
+  const name = document.createElement('strong');
   name.className = 'player-name';
   name.textContent = player.name;
 
-  const pointsLabel = document.createElement('div');
-  pointsLabel.className = 'player-points';
-  pointsLabel.textContent = `${player.points} pts`;
+  const pointsSummary = document.createElement('div');
+  pointsSummary.className = 'player-points';
+  pointsSummary.textContent = `${player.points} pts`;
 
-  info.appendChild(name);
-  info.appendChild(pointsLabel);
+  info.append(name, pointsSummary);
 
-  // Points Display
   const pointsDisplay = document.createElement('div');
   pointsDisplay.className = 'points-display';
+  pointsDisplay.setAttribute('aria-hidden', 'true');
 
-  const pointsValue = document.createElement('div');
+  const pointsValue = document.createElement('span');
   pointsValue.className = 'points-value';
   pointsValue.textContent = player.points;
 
-  const pointsUnit = document.createElement('div');
+  const pointsUnit = document.createElement('span');
   pointsUnit.className = 'points-label';
   pointsUnit.textContent = 'pts';
 
-  pointsDisplay.appendChild(pointsValue);
-  pointsDisplay.appendChild(pointsUnit);
+  pointsDisplay.append(pointsValue, pointsUnit);
+  item.append(positionElement, avatar, info, pointsDisplay);
 
-  // Assemble card
-  card.appendChild(positionElement);
-  card.appendChild(avatar);
-  card.appendChild(info);
-  card.appendChild(pointsDisplay);
-
-  return card;
+  return item;
 }
 
 /**
- * Renders the complete ranking list
- * @param {Array} players - Array of sorted player objects
+ * Renders a ranking status message inside the ordered list.
+ * @param {string} message - Message to display.
+ */
+function renderStatus(message) {
+  const container = document.getElementById(RANKING_CONTAINER_ID);
+  container.replaceChildren();
+
+  const item = document.createElement('li');
+  item.className = 'ranking-status';
+  item.textContent = message;
+  container.appendChild(item);
+}
+
+/**
+ * Renders the complete ranking list.
+ * @param {Array} players - Array of sorted player objects.
  */
 function renderRanking(players) {
-  const container = document.getElementById('rankingContainer');
-  container.innerHTML = ''; // Clear container
+  const container = document.getElementById(RANKING_CONTAINER_ID);
+  container.replaceChildren();
 
-  players.forEach((player, index) => {
-    const position = index + 1;
-    const card = createPlayerCard(player, position);
-    container.appendChild(card);
-  });
-}
-
-/**
- * Initializes the ranking page
- * Loads data, sorts by points, and renders the list
- */
-async function init() {
-  const players = await loadRanking();
-  
   if (players.length === 0) {
-    console.warn('No ranking data available');
-    document.getElementById('rankingContainer').innerHTML = 
-      '<p style="text-align: center; color: #A9B6C9;">Nenhum dado disponível</p>';
+    renderStatus('Nenhum dado disponível no momento.');
     return;
   }
 
-  const sortedPlayers = sortPlayers(players);
-  renderRanking(sortedPlayers);
+  players.forEach((player, index) => {
+    container.appendChild(createPlayerCard(player, index + 1));
+  });
+
+  rankingStatus.hidden = true;
+  rankingContainer.hidden = false;
 }
 
-// Initialize when DOM is ready
+/**
+ * Initializes the ranking page.
+ * Loads data, sorts by points, and renders the list.
+ */
+async function init() {
+  const { players, error } = await loadRanking();
+
+  if (error) {
+    renderStatus('Não foi possível carregar o ranking. Tente novamente em instantes.');
+    return;
+  }
+
+  renderRanking(sortPlayers(players));
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
