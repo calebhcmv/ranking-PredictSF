@@ -3,6 +3,8 @@
  * Static ranking page with automatic data loading and sorting
  */
 
+const RANKING_URL = './ranking.json';
+
 // Medals for top 3 positions
 const MEDALS = {
   1: '🥇',
@@ -10,30 +12,62 @@ const MEDALS = {
   3: '🥉'
 };
 
+const POINTS_FORMATTER = new Intl.NumberFormat('pt-BR');
+
 /**
  * Loads ranking data from ranking.json
  * @returns {Promise<Array>} Array of player objects
  */
 async function loadRanking() {
-  try {
-    const response = await fetch('./ranking.json');
-    if (!response.ok) {
-      throw new Error(`Failed to load ranking: ${response.statusText}`);
-    }
-    return await response.json();
-  } catch (error) {
-    console.error('Error loading ranking:', error);
-    return [];
+  const response = await fetch(RANKING_URL, { cache: 'no-store' });
+
+  if (!response.ok) {
+    throw new Error(`Falha ao carregar o ranking (${response.status})`);
   }
+
+  const players = await response.json();
+
+  if (!Array.isArray(players)) {
+    throw new Error('O arquivo ranking.json precisa conter uma lista de jogadores.');
+  }
+
+  return players;
 }
 
 /**
- * Sorts players by points in descending order
+ * Checks whether a player has the required fields to be rendered.
+ * @param {Object} player - Player object candidate
+ * @returns {boolean} True when player is valid
+ */
+function isValidPlayer(player) {
+  return Boolean(
+    player &&
+      typeof player.name === 'string' &&
+      player.name.trim() &&
+      typeof player.avatar === 'string' &&
+      player.avatar.trim() &&
+      Number.isFinite(player.points)
+  );
+}
+
+/**
+ * Sorts players by points in descending order and then by name.
  * @param {Array} players - Array of player objects
- * @returns {Array} Sorted array of players
+ * @returns {Array} Sorted array of valid players
  */
 function sortPlayers(players) {
-  return [...players].sort((a, b) => b.points - a.points);
+  return players
+    .filter(isValidPlayer)
+    .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, 'pt-BR'));
+}
+
+/**
+ * Formats a point value for display.
+ * @param {number} points - Player points
+ * @returns {string} Formatted points
+ */
+function formatPoints(points) {
+  return POINTS_FORMATTER.format(points);
 }
 
 /**
@@ -43,14 +77,16 @@ function sortPlayers(players) {
  * @returns {HTMLElement} Card element
  */
 function createPlayerCard(player, position) {
-  const card = document.createElement('div');
+  const card = document.createElement('article');
   card.className = 'player-card';
+  card.setAttribute('aria-label', `${position}º lugar: ${player.name} com ${formatPoints(player.points)} pontos`);
 
   // Position or Medal
   const positionElement = document.createElement('div');
   if (MEDALS[position]) {
     positionElement.className = 'medal';
     positionElement.textContent = MEDALS[position];
+    positionElement.setAttribute('aria-hidden', 'true');
   } else {
     positionElement.className = 'position';
     positionElement.textContent = position;
@@ -59,22 +95,23 @@ function createPlayerCard(player, position) {
   // Avatar
   const avatar = document.createElement('div');
   avatar.className = 'avatar';
-  avatar.textContent = player.avatar;
+  avatar.textContent = player.avatar.trim().slice(0, 2).toUpperCase();
+  avatar.setAttribute('aria-hidden', 'true');
 
   // Player Info
   const info = document.createElement('div');
   info.className = 'player-info';
 
-  const name = document.createElement('div');
+  const name = document.createElement('h3');
   name.className = 'player-name';
-  name.textContent = player.name;
+  name.textContent = player.name.trim();
 
-  const pointsLabel = document.createElement('div');
-  pointsLabel.className = 'player-points';
-  pointsLabel.textContent = `${player.points} pts`;
+  const positionLabel = document.createElement('div');
+  positionLabel.className = 'player-points';
+  positionLabel.textContent = `${position}º lugar`;
 
   info.appendChild(name);
-  info.appendChild(pointsLabel);
+  info.appendChild(positionLabel);
 
   // Points Display
   const pointsDisplay = document.createElement('div');
@@ -82,11 +119,11 @@ function createPlayerCard(player, position) {
 
   const pointsValue = document.createElement('div');
   pointsValue.className = 'points-value';
-  pointsValue.textContent = player.points;
+  pointsValue.textContent = formatPoints(player.points);
 
   const pointsUnit = document.createElement('div');
   pointsUnit.className = 'points-label';
-  pointsUnit.textContent = 'pts';
+  pointsUnit.textContent = player.points === 1 ? 'ponto' : 'pontos';
 
   pointsDisplay.appendChild(pointsValue);
   pointsDisplay.appendChild(pointsUnit);
@@ -101,6 +138,21 @@ function createPlayerCard(player, position) {
 }
 
 /**
+ * Renders a status message in the ranking container.
+ * @param {string} message - Message to show
+ * @param {string} type - Status type used for styling
+ */
+function renderStatus(message, type = 'info') {
+  const container = document.getElementById('rankingContainer');
+  container.innerHTML = '';
+
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
+}
+
+/**
  * Renders the complete ranking list
  * @param {Array} players - Array of sorted player objects
  */
@@ -108,11 +160,31 @@ function renderRanking(players) {
   const container = document.getElementById('rankingContainer');
   container.innerHTML = ''; // Clear container
 
+  const fragment = document.createDocumentFragment();
+
   players.forEach((player, index) => {
     const position = index + 1;
     const card = createPlayerCard(player, position);
-    container.appendChild(card);
+    fragment.appendChild(card);
   });
+
+  container.appendChild(fragment);
+}
+
+/**
+ * Updates the timestamp displayed in the footer.
+ */
+function renderUpdatedAt() {
+  const updatedAt = document.getElementById('updatedAt');
+
+  if (!updatedAt) {
+    return;
+  }
+
+  updatedAt.textContent = `Revisado em ${new Intl.DateTimeFormat('pt-BR', {
+    dateStyle: 'short',
+    timeStyle: 'short'
+  }).format(new Date())}`;
 }
 
 /**
@@ -120,17 +192,23 @@ function renderRanking(players) {
  * Loads data, sorts by points, and renders the list
  */
 async function init() {
-  const players = await loadRanking();
-  
-  if (players.length === 0) {
-    console.warn('No ranking data available');
-    document.getElementById('rankingContainer').innerHTML = 
-      '<p style="text-align: center; color: #A9B6C9;">Nenhum dado disponível</p>';
-    return;
-  }
+  renderStatus('Carregando ranking...');
 
-  const sortedPlayers = sortPlayers(players);
-  renderRanking(sortedPlayers);
+  try {
+    const players = await loadRanking();
+    const sortedPlayers = sortPlayers(players);
+
+    if (sortedPlayers.length === 0) {
+      renderStatus('Nenhum dado disponível no momento.');
+      return;
+    }
+
+    renderRanking(sortedPlayers);
+    renderUpdatedAt();
+  } catch (error) {
+    console.error('Error loading ranking:', error);
+    renderStatus('Não foi possível carregar o ranking. Tente novamente em instantes.', 'error');
+  }
 }
 
 // Initialize when DOM is ready
