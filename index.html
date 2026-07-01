@@ -87,6 +87,18 @@
             border: 0;
         }
 
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         .header {
             text-align: center;
             animation: fadeIn 0.6s ease-out;
@@ -294,6 +306,23 @@
             text-align: center;
         }
 
+        .status-message {
+            color: #A9B6C9;
+            padding: 24px 16px;
+            text-align: center;
+        }
+
+        .status-error {
+            color: #FFB4B4;
+        }
+
+        .footer {
+            color: #A9B6C9;
+            font-size: 0.75rem;
+            margin-top: 24px;
+            text-align: center;
+        }
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -352,11 +381,82 @@
 
         <!-- Ranking List -->
         <main class="ranking-list" id="rankingContainer" aria-live="polite" aria-busy="false">
-            <!-- Players will be rendered here -->
+            <article class="player-card" aria-label="1º lugar: Caleb com 187 pontos">
+                <div class="medal" aria-hidden="true">🥇</div>
+                <div class="avatar" aria-hidden="true">C</div>
+                <div class="player-info">
+                    <h3 class="player-name">Caleb</h3>
+                    <div class="player-points">1º lugar</div>
+                </div>
+                <div class="points-display">
+                    <div class="points-value">187</div>
+                    <div class="points-label">pontos</div>
+                </div>
+            </article>
+            <article class="player-card" aria-label="2º lugar: Lucas com 181 pontos">
+                <div class="medal" aria-hidden="true">🥈</div>
+                <div class="avatar" aria-hidden="true">L</div>
+                <div class="player-info">
+                    <h3 class="player-name">Lucas</h3>
+                    <div class="player-points">2º lugar</div>
+                </div>
+                <div class="points-display">
+                    <div class="points-value">181</div>
+                    <div class="points-label">pontos</div>
+                </div>
+            </article>
+            <article class="player-card" aria-label="3º lugar: Pedro com 178 pontos">
+                <div class="medal" aria-hidden="true">🥉</div>
+                <div class="avatar" aria-hidden="true">P</div>
+                <div class="player-info">
+                    <h3 class="player-name">Pedro</h3>
+                    <div class="player-points">3º lugar</div>
+                </div>
+                <div class="points-display">
+                    <div class="points-value">178</div>
+                    <div class="points-label">pontos</div>
+                </div>
+            </article>
+            <article class="player-card" aria-label="4º lugar: João com 154 pontos">
+                <div class="position">4</div>
+                <div class="avatar" aria-hidden="true">J</div>
+                <div class="player-info">
+                    <h3 class="player-name">João</h3>
+                    <div class="player-points">4º lugar</div>
+                </div>
+                <div class="points-display">
+                    <div class="points-value">154</div>
+                    <div class="points-label">pontos</div>
+                </div>
+            </article>
+            <article class="player-card" aria-label="5º lugar: Maria com 142 pontos">
+                <div class="position">5</div>
+                <div class="avatar" aria-hidden="true">M</div>
+                <div class="player-info">
+                    <h3 class="player-name">Maria</h3>
+                    <div class="player-points">5º lugar</div>
+                </div>
+                <div class="points-display">
+                    <div class="points-value">142</div>
+                    <div class="points-label">pontos</div>
+                </div>
+            </article>
+            <article class="player-card" aria-label="6º lugar: Ana com 135 pontos">
+                <div class="position">6</div>
+                <div class="avatar" aria-hidden="true">A</div>
+                <div class="player-info">
+                    <h3 class="player-name">Ana</h3>
+                    <div class="player-points">6º lugar</div>
+                </div>
+                <div class="points-display">
+                    <div class="points-value">135</div>
+                    <div class="points-label">pontos</div>
+                </div>
+            </article>
         </main>
 
         <footer class="footer">
-            <span id="updatedAt">Pronto para atualização</span>
+            <span id="updatedAt">Dados embutidos</span>
             <span class="sr-only">Ranking carregado a partir do arquivo ranking.json</span>
         </footer>
     </div>

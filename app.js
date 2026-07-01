@@ -190,21 +190,10 @@ function createPlayerCard(player, position) {
   pointsUnit.className = 'points-label';
   pointsUnit.textContent = player.points === 1 ? 'ponto' : 'pontos';
 
-  return item;
-}
-
-/**
- * Renders a ranking status message inside the ordered list.
- * @param {string} message - Message to display.
- */
-function renderStatus(message) {
-  const container = document.getElementById(RANKING_CONTAINER_ID);
-  container.replaceChildren();
-
-  const item = document.createElement('li');
-  item.className = 'ranking-status';
-  item.textContent = message;
-  container.appendChild(item);
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
 }
 
 /**
@@ -264,6 +253,8 @@ function renderRanking(players) {
     renderStatus('Nenhum dado disponível no momento.');
     return;
   }
+
+  const fragment = document.createDocumentFragment();
 
   const fragment = document.createDocumentFragment();
 
