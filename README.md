@@ -1,48 +1,57 @@
 # 🏆 PredictSF Ranking MVP
 
-Página estática, moderna e responsiva para exibir o ranking geral do PredictSF. O MVP não usa backend, banco de dados, framework ou etapa de build: os dados são carregados diretamente do arquivo `ranking.json`.
+Página estática, moderna e responsiva para publicar o ranking geral do PredictSF. O projeto lê os dados do arquivo `ranking.json`, ordena os participantes por pontuação em ordem decrescente e recalcula as posições automaticamente no navegador.
 
-## Stack
+## Objetivo do projeto
 
-- HTML5 semântico
-- CSS3 organizado
-- JavaScript ES6
-- Tailwind CSS via CDN
-- Google Fonts: Poppins para títulos e Inter para conteúdo
+O objetivo é manter um ranking simples de publicar e atualizar, sem painel administrativo, API, banco de dados ou etapa de compilação. Para atualizar a classificação, basta editar o arquivo `ranking.json`, salvar, versionar a alteração no Git e publicar novamente no Cloudflare Pages.
 
-## Estrutura
+## Sem dependências de aplicação ou backend
+
+Este projeto é composto apenas por arquivos estáticos:
+
+- `index.html` para a estrutura da página.
+- CSS embutido no próprio HTML para layout e responsividade.
+- `app.js` para carregar, ordenar e renderizar os dados.
+- `ranking.json` como fonte de dados estática.
+
+Ele **não depende** de React, Next.js, Vue, Angular, Bootstrap, jQuery, Node.js, banco de dados ou backend. O único carregamento externo da página é visual: Google Fonts e Tailwind CSS via CDN. Não existe `package.json`, processo de build, servidor de aplicação, API própria ou dependência de runtime para publicar o site.
+
+## Estrutura `/ranking`
+
+A estrutura esperada do diretório do ranking é:
 
 ```text
 /ranking
-│
-├── index.html      # Página principal e estilos do MVP
-├── app.js          # Carregamento, ordenação e renderização do ranking
-├── ranking.json    # Dados estáticos dos jogadores
+├── index.html      # Página principal publicada no navegador
+├── app.js          # Lógica de carregamento, ordenação e renderização
+├── ranking.json    # Dados editáveis do ranking
 └── README.md       # Documentação do projeto
 ```
 
-## Como funciona
+> Neste repositório, esses arquivos ficam na raiz. Ao publicar no Cloudflare Pages com output `/`, a raiz do repositório funciona como o diretório `/ranking` documentado acima.
 
-Ao abrir a página em um servidor estático, o JavaScript executa o seguinte fluxo:
+## Como editar `ranking.json`
 
-1. Busca o arquivo `ranking.json`.
-2. Valida se o conteúdo é um array.
-3. Ordena os jogadores por `points` em ordem decrescente.
-4. Calcula as posições dinamicamente a partir da lista ordenada.
-5. Renderiza todos os cards com medalhas para o Top 3.
+1. Abra o arquivo `ranking.json`.
+2. Edite a lista de jogadores: adicione, remova ou atualize objetos.
+3. Garanta que o JSON continue válido, sem comentários e sem vírgula sobrando no último item.
+4. Salve o arquivo.
+5. Rode localmente para validar.
+6. Faça commit e push para o repositório conectado ao Cloudflare Pages.
 
-> A posição nunca é lida do JSON. Ela sempre é calculada no navegador com base na pontuação atual.
+A ordem dos objetos dentro do arquivo não precisa ser manualmente ajustada. O JavaScript lê todos os itens e ordena automaticamente por `points` em ordem decrescente, recalculando as posições exibidas na tela a cada carregamento da página.
 
-## Formato do JSON
+## Formato esperado do JSON
 
-O arquivo `ranking.json` deve conter um array de jogadores neste formato:
+O arquivo deve conter um array JSON. Cada item representa um jogador:
 
 ```json
 [
   {
     "id": 1,
-    "name": "Caleb",
-    "avatar": "C",
+    "name": "Nome do Jogador",
+    "avatar": "N",
     "points": 187
   },
   {
@@ -60,25 +69,32 @@ O arquivo `ranking.json` deve conter um array de jogadores neste formato:
 ]
 ```
 
-### Campos
+Campos obrigatórios:
 
-- `id`: identificador único do jogador.
-- `name`: nome exibido no card.
-- `avatar`: inicial exibida no avatar circular.
-- `points`: pontuação usada para ordenar o ranking.
+| Campo | Tipo | Descrição |
+| --- | --- | --- |
+| `id` | número | Identificador único do jogador. Não define a posição no ranking. |
+| `name` | texto | Nome exibido no card do jogador. |
+| `avatar` | texto | Inicial ou abreviação curta exibida no círculo do avatar. Recomenda-se 1 caractere. |
+| `points` | número | Pontuação usada para ordenar o ranking. Quanto maior, melhor a posição. |
 
-## Como atualizar o ranking
+Exemplo com múltiplos jogadores fora de ordem:
 
-1. Abra o arquivo `ranking.json`.
-2. Adicione, remova ou edite jogadores.
-3. Atualize o valor de `points` sempre que a pontuação mudar.
-4. Salve o arquivo e publique novamente, se estiver em produção.
+```json
+[
+  { "id": 2, "name": "Lucas", "avatar": "L", "points": 181 },
+  { "id": 1, "name": "Caleb", "avatar": "C", "points": 187 },
+  { "id": 6, "name": "Ana", "avatar": "A", "points": 190 }
+]
+```
 
-A lista pode ficar em qualquer ordem dentro do JSON, pois a interface sempre ordena por pontuação automaticamente.
+Mesmo nesse exemplo, a página exibirá Ana em 1º, Caleb em 2º e Lucas em 3º porque a ordenação é feita automaticamente por pontuação.
 
-## Rodando localmente
+## Como rodar localmente com servidor estático
 
-Por usar `fetch()` para carregar `ranking.json`, rode os arquivos com um servidor estático local:
+Não abra `index.html` diretamente com `file://`, porque o navegador pode bloquear o `fetch('./ranking.json')`. Use um servidor HTTP estático.
+
+Com Python 3, rode na raiz do projeto:
 
 ```bash
 python3 -m http.server 8000
@@ -90,38 +106,72 @@ Depois acesse:
 http://localhost:8000
 ```
 
-Também é possível usar qualquer servidor estático moderno, como Live Server no VS Code ou o preview do Cloudflare Pages.
+Valide no navegador que:
 
-## Publicação no Cloudflare Pages
+- A página abre sem erro.
+- O título “PredictSF” aparece.
+- A lista de jogadores é carregada a partir de `ranking.json`.
+- As posições são exibidas em ordem decrescente de `points`.
+- Ao alterar `ranking.json` e recarregar a página, a lista recalcula as posições automaticamente.
 
-1. Envie os arquivos para um repositório Git.
-2. No painel da Cloudflare, acesse **Workers & Pages**.
-3. Crie um novo projeto do Pages e conecte o repositório.
-4. Configure:
+## Como publicar no Cloudflare Pages sem build command
+
+### Pré-requisitos
+
+- Repositório Git com os arquivos do projeto.
+- Conta Cloudflare com acesso ao Cloudflare Pages.
+
+### Configuração recomendada
+
+1. Faça push dos arquivos para o repositório Git.
+2. No painel da Cloudflare, acesse **Workers & Pages** ou **Pages**.
+3. Clique em **Create a project**.
+4. Escolha **Connect to Git**.
+5. Selecione o repositório do ranking.
+6. Configure o projeto assim:
    - **Build command:** deixe vazio.
    - **Build output directory:** `/`.
-5. Faça o deploy.
+   - **Root directory:** mantenha a raiz do repositório, se essa opção aparecer.
+7. Clique em **Save and Deploy**.
 
-Como não existe build, o Cloudflare Pages publicará diretamente os arquivos estáticos da raiz do projeto.
+Como o projeto é 100% estático, o Cloudflare Pages só precisa publicar os arquivos da raiz. Não há build command, install command, framework preset, função serverless, banco ou backend para configurar.
 
-## Design e UX
+## Validação após deploy
 
-- Fundo azul escuro `#07162A`.
-- Card central premium com largura máxima de `700px`.
-- Visual inspirado em Apple + Sofascore.
-- Cards responsivos sem barra horizontal.
-- Hover suave com transição de `200ms`.
-- Animação de fade na entrada da lista.
-- Medalhas para 1º, 2º e 3º lugares.
-- Pontuação alinhada à direita.
+Depois que o Cloudflare Pages gerar a URL pública, por exemplo `https://nome-do-projeto.pages.dev`, valide:
 
-## Manutenção
+- Desktop: abrir a URL em um navegador de desktop e confirmar título, layout e ranking carregado.
+- Mobile: abrir no celular ou em modo responsivo do navegador e confirmar que os cards se ajustam sem rolagem horizontal.
+- Dados: conferir que a ordem exibida corresponde aos maiores valores de `points` em `ranking.json`.
+- Atualização: editar `ranking.json`, fazer commit e push, aguardar novo deploy e recarregar a URL pública para confirmar que as posições foram recalculadas.
 
-A lógica principal fica em funções pequenas no `app.js`:
+## Atualização real do ranking
 
-- `loadRanking()`
-- `sortPlayers()`
-- `renderRanking()`
-- `createPlayerCard()`
+Fluxo recomendado para uma atualização real:
 
-Isso facilita alterações futuras sem adicionar dependências ou complexidade desnecessária.
+1. Edite `ranking.json` aumentando ou reduzindo a pontuação de pelo menos um jogador.
+2. Rode `python3 -m http.server 8000`.
+3. Abra `http://localhost:8000` e confira a nova ordem.
+4. Faça commit da alteração.
+5. Faça push para o branch conectado ao Cloudflare Pages.
+6. Aguarde o redeploy automático.
+7. Abra a URL pública em desktop e mobile.
+8. Confirme que a lista foi reordenada automaticamente conforme os novos valores de `points`.
+
+## Como o JavaScript funciona
+
+O arquivo `app.js` executa cinco etapas principais:
+
+1. `loadRanking()` busca `ranking.json` via `fetch`.
+2. `sortPlayers()` cria uma cópia do array e ordena por `points` em ordem decrescente.
+3. `createPlayerCard()` monta o card HTML de cada jogador.
+4. `renderRanking()` insere todos os cards no contêiner `#rankingContainer`.
+5. `init()` coordena o carregamento, tratamento de lista vazia e renderização.
+
+## Notas importantes
+
+- `id` é apenas identificador, não posição.
+- A posição exibida é calculada pelo índice após a ordenação por pontos.
+- Mantenha `points` como número, não string.
+- O arquivo `ranking.json` precisa ser JSON válido.
+- Para deploy no Cloudflare Pages, use build command vazio e output directory `/`.
