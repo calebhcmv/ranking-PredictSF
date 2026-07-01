@@ -3,36 +3,36 @@
     "id": 1,
     "name": "Caleb",
     "avatar": "C",
-    "points": 187
+    "points": 10
   },
   {
     "id": 2,
     "name": "Lucas",
     "avatar": "L",
-    "points": 181
+    "points": 18
   },
   {
     "id": 3,
     "name": "Pedro",
     "avatar": "P",
-    "points": 178
+    "points": 17
   },
   {
     "id": 4,
     "name": "João",
     "avatar": "J",
-    "points": 154
+    "points": 15
   },
   {
     "id": 5,
     "name": "Maria",
     "avatar": "M",
-    "points": 142
+    "points": 14
   },
   {
     "id": 6,
     "name": "Ana",
     "avatar": "A",
-    "points": 135
+    "points": 19
   }
 ]

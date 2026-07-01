@@ -1,6 +1,6 @@
 /**
  * PredictSF Ranking MVP
- * Static ranking page with automatic data loading and sorting
+ * Static ranking page with automatic data loading and sorting.
  */
 
 const RANKING_URLS = ['./ranking.json', '/ranking.json'];
@@ -120,10 +120,28 @@ function formatPoints(points) {
 }
 
 /**
- * Creates a player card HTML element
- * @param {Object} player - Player object with id, name, avatar, points
- * @param {number} position - Player's position in ranking (1-indexed)
- * @returns {HTMLElement} Card element
+ * Formats a point value for display.
+ * @param {number} points - Player points
+ * @returns {string} Formatted points
+ */
+function formatPoints(points) {
+  return POINTS_FORMATTER.format(points);
+}
+
+/**
+ * Formats a point value for display.
+ * @param {number} points - Player points
+ * @returns {string} Formatted points
+ */
+function formatPoints(points) {
+  return POINTS_FORMATTER.format(points);
+}
+
+/**
+ * Creates a player card HTML element.
+ * @param {Object} player - Player object with id, name, avatar, points.
+ * @param {number} position - Player's generated ranking position (1-indexed).
+ * @returns {HTMLElement} List item element.
  */
 function createPlayerCard(player, position) {
   const card = document.createElement('article');
@@ -141,13 +159,11 @@ function createPlayerCard(player, position) {
     positionElement.textContent = position;
   }
 
-  // Avatar
-  const avatar = document.createElement('div');
+  const avatar = document.createElement('span');
   avatar.className = 'avatar';
   avatar.textContent = player.avatar.trim().slice(0, 2).toUpperCase();
   avatar.setAttribute('aria-hidden', 'true');
 
-  // Player Info
   const info = document.createElement('div');
   info.className = 'player-info';
 
@@ -162,28 +178,52 @@ function createPlayerCard(player, position) {
   info.appendChild(name);
   info.appendChild(positionLabel);
 
-  // Points Display
   const pointsDisplay = document.createElement('div');
   pointsDisplay.className = 'points-display';
+  pointsDisplay.setAttribute('aria-hidden', 'true');
 
-  const pointsValue = document.createElement('div');
+  const pointsValue = document.createElement('span');
   pointsValue.className = 'points-value';
   pointsValue.textContent = formatPoints(player.points);
 
-  const pointsUnit = document.createElement('div');
+  const pointsUnit = document.createElement('span');
   pointsUnit.className = 'points-label';
   pointsUnit.textContent = player.points === 1 ? 'ponto' : 'pontos';
 
-  pointsDisplay.appendChild(pointsValue);
-  pointsDisplay.appendChild(pointsUnit);
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
+}
 
-  // Assemble card
-  card.appendChild(positionElement);
-  card.appendChild(avatar);
-  card.appendChild(info);
-  card.appendChild(pointsDisplay);
+/**
+ * Renders a status message in the ranking container.
+ * @param {string} message - Message to show
+ * @param {string} type - Status type used for styling
+ */
+function renderStatus(message, type = 'info') {
+  const container = document.getElementById('rankingContainer');
+  container.innerHTML = '';
 
-  return card;
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
+}
+
+/**
+ * Renders a status message in the ranking container.
+ * @param {string} message - Message to show
+ * @param {string} type - Status type used for styling
+ */
+function renderStatus(message, type = 'info') {
+  const container = document.getElementById('rankingContainer');
+  container.innerHTML = '';
+
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
 }
 
 /**
@@ -206,8 +246,19 @@ function renderStatus(message, type = 'info') {
  * @param {Array} players - Array of sorted player objects
  */
 function renderRanking(players) {
-  const container = document.getElementById('rankingContainer');
-  container.innerHTML = ''; // Clear container
+  const container = document.getElementById(RANKING_CONTAINER_ID);
+  container.replaceChildren();
+
+  if (players.length === 0) {
+    renderStatus('Nenhum dado disponível no momento.');
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  const fragment = document.createDocumentFragment();
+
+  const fragment = document.createDocumentFragment();
 
   const fragment = document.createDocumentFragment();
 
@@ -237,8 +288,7 @@ function renderUpdatedAt(source = 'ranking.json') {
 }
 
 /**
- * Initializes the ranking page
- * Loads data, sorts by points, and renders the list
+ * Updates the timestamp displayed in the footer.
  */
 async function init() {
   const fallbackPlayers = sortPlayers(FALLBACK_RANKING);
@@ -264,7 +314,6 @@ async function init() {
   }
 }
 
-// Initialize when DOM is ready
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', init);
 } else {
