@@ -53,10 +53,10 @@ const MEDALS = {
 const POINTS_FORMATTER = new Intl.NumberFormat('pt-BR');
 
 /**
- * Loads ranking data from ranking.json
+ * Loads ranking data from ranking.json when the deployed host serves it.
  * @returns {Promise<Object>} Ranking payload with players and source
  */
-async function loadRanking() {
+async function loadRemoteRanking() {
   const errors = [];
 
   for (const url of RANKING_URLS) {
@@ -80,8 +80,7 @@ async function loadRanking() {
     }
   }
 
-  console.warn('Using bundled fallback ranking data:', errors);
-  return { players: FALLBACK_RANKING, source: 'dados embutidos' };
+  throw new Error(`Nenhuma fonte remota de ranking disponível: ${errors.length} tentativa(s) falharam.`);
 }
 
 /**
@@ -109,6 +108,15 @@ function sortPlayers(players) {
   return players
     .filter(isValidPlayer)
     .sort((a, b) => b.points - a.points || a.name.localeCompare(b.name, 'pt-BR'));
+}
+
+/**
+ * Formats a point value for display.
+ * @param {number} points - Player points
+ * @returns {string} Formatted points
+ */
+function formatPoints(points) {
+  return POINTS_FORMATTER.format(points);
 }
 
 /**
@@ -182,9 +190,6 @@ function createPlayerCard(player, position) {
   pointsUnit.className = 'points-label';
   pointsUnit.textContent = player.points === 1 ? 'ponto' : 'pontos';
 
-  pointsDisplay.append(pointsValue, pointsUnit);
-  item.append(positionElement, avatar, info, pointsDisplay);
-
   return item;
 }
 
@@ -200,6 +205,21 @@ function renderStatus(message) {
   item.className = 'ranking-status';
   item.textContent = message;
   container.appendChild(item);
+}
+
+/**
+ * Renders a status message in the ranking container.
+ * @param {string} message - Message to show
+ * @param {string} type - Status type used for styling
+ */
+function renderStatus(message, type = 'info') {
+  const container = document.getElementById('rankingContainer');
+  container.innerHTML = '';
+
+  const status = document.createElement('p');
+  status.className = `status-message status-${type}`;
+  status.textContent = message;
+  container.appendChild(status);
 }
 
 /**
@@ -249,6 +269,8 @@ function renderRanking(players) {
 
   const fragment = document.createDocumentFragment();
 
+  const fragment = document.createDocumentFragment();
+
   players.forEach((player, index) => {
     const position = index + 1;
     const card = createPlayerCard(player, position);
@@ -278,22 +300,26 @@ function renderUpdatedAt(source = 'ranking.json') {
  * Updates the timestamp displayed in the footer.
  */
 async function init() {
-  renderStatus('Carregando ranking...');
+  const fallbackPlayers = sortPlayers(FALLBACK_RANKING);
+
+  if (fallbackPlayers.length === 0) {
+    renderStatus('Nenhum dado disponível no momento.');
+    return;
+  }
+
+  renderRanking(fallbackPlayers);
+  renderUpdatedAt('dados embutidos');
 
   try {
-    const { players, source } = await loadRanking();
+    const { players, source } = await loadRemoteRanking();
     const sortedPlayers = sortPlayers(players);
 
-    if (sortedPlayers.length === 0) {
-      renderStatus('Nenhum dado disponível no momento.');
-      return;
+    if (sortedPlayers.length > 0) {
+      renderRanking(sortedPlayers);
+      renderUpdatedAt(source);
     }
-
-    renderRanking(sortedPlayers);
-    renderUpdatedAt(source);
   } catch (error) {
-    console.error('Error loading ranking:', error);
-    renderStatus('Não foi possível carregar o ranking. Confira o arquivo ranking.json.', 'error');
+    console.warn('Remote ranking unavailable; keeping bundled ranking:', error);
   }
 }
 
