@@ -102,9 +102,60 @@ python3 -m http.server 8000
 
 Depois acesse:
 
-```text
-http://localhost:8000
-```
+1. **Faça push do código para um repositório Git:**
+   ```bash
+   git add .
+   git commit -m "Initial commit: PredictSF Ranking MVP"
+   git push origin main
+   ```
+
+2. **Acesse o Cloudflare Dashboard:**
+   - Vá para https://dash.cloudflare.com
+   - Navegue até "Pages"
+   - Clique em "Create a project"
+
+3. **Conecte seu repositório:**
+   - Selecione seu provedor de Git
+   - Autorize o Cloudflare a acessar seus repositórios
+   - Selecione o repositório `ranking-PredictSF`
+
+4. **Configure o build:**
+   - Build command: deixe vazio (não há build necessário)
+   - Build output directory: `/` (raiz do projeto)
+
+5. **Deploy:**
+   - Clique em "Save and Deploy"
+   - O site será publicado automaticamente em `https://<seu-projeto>.pages.dev`
+
+### Atualizações Automáticas
+
+Cada vez que você fizer push para o branch `main`, o Cloudflare Pages automaticamente:
+- Detecta as mudanças
+- Faz redeploy do site
+- Seu ranking será atualizado em minutos
+
+## 🔧 Desenvolvimento
+
+### Modularidade do JavaScript
+
+O código em `app.js` é organizado em funções limpas e bem documentadas:
+
+- `loadRanking()` - Carrega dados do ranking.json
+- `sortPlayers()` - Ordena jogadores por pontuação
+- `createPlayerCard()` - Cria elemento HTML do card
+- `renderRanking()` - Renderiza a lista completa
+- `init()` - Inicializa a página
+
+### Boas Práticas
+
+- ✅ HTML semântico
+- ✅ Sem duplicação de código
+- ✅ Comentários descritivos
+- ✅ Variáveis e funções com nomes claros
+- ✅ Tratamento de erros
+- ✅ Responsivo com CSS moderno
+- ✅ Performance otimizada
+- ✅ Compatibilidade com navegadores modernos
 
 Valide no navegador que:
 
@@ -116,7 +167,12 @@ Valide no navegador que:
 
 ## Como publicar no Cloudflare Pages sem build command
 
-### Pré-requisitos
+- ✨ Animações suaves e elegantes
+- 🏅 Medalhas para top 3 posições
+- 📊 Avatares circulares com gradiente
+- 💫 Hover effects premium
+- 📱 Design responsivo perfeito
+- ♿ Semântica acessível
 
 - Repositório Git com os arquivos do projeto.
 - Conta Cloudflare com acesso ao Cloudflare Pages.
@@ -138,7 +194,18 @@ Como o projeto é 100% estático, o Cloudflare Pages só precisa publicar os arq
 
 ## Validação após deploy
 
-Depois que o Cloudflare Pages gerar a URL pública, por exemplo `https://nome-do-projeto.pages.dev`, valide:
+### Atualizar pontos
+
+Simplesmente modifique o valor de `points` no JSON:
+
+```json
+{
+  "id": 1,
+  "name": "Caleb",
+  "avatar": "C",
+  "points": 195  // Pontuação atualizada
+}
+```
 
 - Desktop: abrir a URL em um navegador de desktop e confirmar título, layout e ranking carregado.
 - Mobile: abrir no celular ou em modo responsivo do navegador e confirmar que os cards se ajustam sem rolagem horizontal.
